@@ -1,4 +1,4 @@
-import time, os, torch
+import time, os, json, torch
 from transformers import pipeline
 
 hf_token = os.getenv('HUGGINGFACE_TOKEN')
@@ -12,7 +12,7 @@ generator = pipeline('text-generation', model='meta-llama/Meta-Llama-3-8B',
 											"low_cpu_mem_usage": True,
     								})
 start_time = time.time()
-res = generator('Explain why 0.2 + 0.3 not equals to 0.5?', max_length=200, num_return_sequences=3)
+res = generator('The color of an apple is', max_length=100, num_return_sequences=2)
 end_time = time.time()
 print("Time taken: ", end_time - start_time, "seconds")
-print(res)
+print(json.dumps(res, indent=4))

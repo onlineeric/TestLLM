@@ -1,9 +1,9 @@
-import time, os, torch
+import time, json
 from transformers import pipeline
 
 generator = pipeline('text-generation', model='gpt2', device=0)
 start_time = time.time()
-res = generator('Explain why 0.2 + 0.3 not equals to 0.5?', max_length=200, num_return_sequences=3)
+res = generator('The color of an apple is', max_length=100, num_return_sequences=3)
 end_time = time.time()
 print("Time taken: ", end_time - start_time, "seconds")
-print(res)
+print(json.dumps(res, indent=4))
