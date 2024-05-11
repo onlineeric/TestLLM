@@ -5,13 +5,13 @@ hf_token = os.getenv('HUGGINGFACE_TOKEN')
 
 start_time = time.time()
 generator = pipeline('text-generation', model='meta-llama/Meta-Llama-3-8B', 
-                     token=hf_token, 
-                     device=-1,
+										 token=hf_token,
+										 device=-1,
 										model_kwargs={
 										# "torch_dtype": torch.float16,
 										# 	"quantization_config": {"load_in_4bit": True},
 										"low_cpu_mem_usage": True,
-    								})
+										})
 
 end_time = time.time()
 print("Time taken for pipeline: ", end_time - start_time, "seconds")

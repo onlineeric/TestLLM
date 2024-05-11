@@ -1,9 +1,31 @@
 import transformers
 import torch
+import time
+import json
+import os
 
 model_id = "meta-llama/Meta-Llama-3-8B"
+hf_token = os.getenv('HUGGINGFACE_TOKEN')
 
-pipeline = transformers.pipeline(
-    "text-generation", model=model_id, model_kwargs={"torch_dtype": torch.bfloat16}, device_map="auto"
+start_pipline_time = time.time()
+
+generator = transformers.pipeline(
+    "text-generation", 
+    token=hf_token,
+    model=model_id, 
+    model_kwargs={"torch_dtype": torch.bfloat16}, 
+    device_map="auto"
 )
-pipeline("Hey how are you doing today?")
+
+end_pipeline_time = time.time()
+print("$$$$$$$$$$$$$$$$$ Time taken for pipeline: ", end_pipeline_time - start_pipline_time, "seconds")
+
+start_req_time = time.time()
+res = generator("How to train my dog to sit?")
+end_req_time = time.time()
+
+print("$$$$$$$$$$$$$$$$$ Response: ")
+print(json.dumps(res, indent=4))
+print("$$$$$$$$$$$$$$$$$ Time taken for generate response: ", end_req_time - start_req_time, "seconds")
+print("$$$$$$$$$$$$$$$$$ Total Time taken: ", end_req_time - start_pipline_time, "seconds")
+
