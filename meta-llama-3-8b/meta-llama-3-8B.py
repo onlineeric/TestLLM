@@ -10,11 +10,14 @@ hf_token = os.getenv('HUGGINGFACE_TOKEN')
 start_pipline_time = time.time()
 
 generator = transformers.pipeline(
-    "text-generation", 
-    token=hf_token,
-    model=model_id, 
-    model_kwargs={"torch_dtype": torch.bfloat16}, 
-    device_map="auto"
+		"text-generation", 
+		token=hf_token,
+		model=model_id, 
+		model_kwargs={"torch_dtype": torch.bfloat16}, 
+		### below can only choose one
+		#device_map="auto",
+		device=0,
+		#device=-1,
 )
 
 end_pipeline_time = time.time()
