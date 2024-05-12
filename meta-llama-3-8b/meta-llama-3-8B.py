@@ -13,10 +13,10 @@ generator = transformers.pipeline(
 		"text-generation", 
 		token=hf_token,
 		model=model_id, 
-		model_kwargs={"torch_dtype": torch.bfloat16}, 
+		model_kwargs={"torch_dtype": torch.bfloat16},
 		### below can only choose one
-		#device_map="auto",
-		device=0,
+		device_map="auto",
+		#device=0,
 		#device=-1,
 )
 
@@ -24,11 +24,14 @@ end_pipeline_time = time.time()
 print("$$$$$$$$$$$$$$$$$ Time taken for pipeline: ", end_pipeline_time - start_pipline_time, "seconds")
 
 start_req_time = time.time()
-res = generator("How to train my dog to sit?")
+res = generator("How to train my dog to sit?", max_length=100, num_return_sequences=3)
 end_req_time = time.time()
 
 print("$$$$$$$$$$$$$$$$$ Response: ")
 print(json.dumps(res, indent=4))
 print("$$$$$$$$$$$$$$$$$ Time taken for generate response: ", end_req_time - start_req_time, "seconds")
 print("$$$$$$$$$$$$$$$$$ Total Time taken: ", end_req_time - start_pipline_time, "seconds")
-
+if hasattr(generator, 'device'):
+		print("$$$$$$$$$$$$$$$$$ device: ", generator.device)
+if hasattr(generator, 'device_map'):
+		print("$$$$$$$$$$$$$$$$$ device_map: ", generator.device_map)
