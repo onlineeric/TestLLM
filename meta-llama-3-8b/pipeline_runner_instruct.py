@@ -1,6 +1,6 @@
 import time
 
-def run_pipeline(pipeline, messages):
+def run_pipeline(pipeline, messages, max_new_tokens=200):
 	start_pipline_time = time.time()
 
 	end_pipeline_time = time.time()
