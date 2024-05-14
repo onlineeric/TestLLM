@@ -21,7 +21,7 @@ def run_pipeline(pipeline, messages, max_new_tokens=200):
 
 	outputs = pipeline(
 		prompt,
-		max_new_tokens=200,
+		max_new_tokens=max_new_tokens,
 		#max_length=200,
 		eos_token_id=terminators,
 		do_sample=True,
