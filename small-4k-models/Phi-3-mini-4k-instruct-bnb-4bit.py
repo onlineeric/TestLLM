@@ -1,17 +1,17 @@
 import torch, time
 from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
 
-model_name = "microsoft/Phi-3-mini-4k-instruct"
+model_id = "unsloth/Phi-3-mini-4k-instruct-bnb-4bit"
 
 torch.random.manual_seed(0)
 
 model = AutoModelForCausalLM.from_pretrained(
-		model_name,
+		model_id,
 		device_map="cuda:0", 
 		torch_dtype="auto", 
 		trust_remote_code=True, 
 )
-tokenizer = AutoTokenizer.from_pretrained(model_name)
+tokenizer = AutoTokenizer.from_pretrained(model_id)
 
 # messages = [
 # 		{"role": "user", "content": "Can you provide ways to eat combinations of bananas and dragonfruits?"},
