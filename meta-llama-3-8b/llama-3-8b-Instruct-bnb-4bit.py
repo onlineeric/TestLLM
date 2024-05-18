@@ -1,7 +1,7 @@
 import transformers, os, torch
 from pipeline_runner_instruct import run_pipeline
 
-model_id = "meta-llama/Meta-Llama-3-8B-Instruct"
+model_id = "unsloth/llama-3-8b-Instruct-bnb-4bit"
 hf_token = os.getenv('HUGGINGFACE_TOKEN')
 
 messages = [
@@ -15,15 +15,15 @@ messages = [
 		# {"role": "user", "content": "My dog is not responding to the 'sit' command. What should I do?"},
 ]
 
-pipeline = transformers.pipeline(
-		"text-generation",
-		token=hf_token,
-		model=model_id,
-		model_kwargs={"torch_dtype": torch.bfloat16},
-		device=-1, # CPU
-		)
+# pipeline = transformers.pipeline(
+# 		"text-generation",
+# 		token=hf_token,
+# 		model=model_id,
+# 		model_kwargs={"torch_dtype": torch.bfloat16},
+# 		device=-1, # CPU
+# 		)
 
-run_pipeline(pipeline, messages, 200) 
+# run_pipeline(pipeline, messages, 500) 
 
 pipeline = transformers.pipeline(
 		"text-generation",
@@ -33,4 +33,4 @@ pipeline = transformers.pipeline(
 		device_map="auto",
 		)
 
-run_pipeline(pipeline, messages, 200)
+run_pipeline(pipeline, messages, 1000)
