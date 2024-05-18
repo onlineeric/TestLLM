@@ -29,8 +29,8 @@ pipeline = transformers.pipeline(
 		"text-generation",
 		token=hf_token,
 		model=model_id,
-		model_kwargs={"torch_dtype": torch.bfloat16},
-		#device_map="auto",
+		# model_kwargs={"torch_dtype": torch.bfloat16},
+		device_map="cuda:0",
 		)
 
 run_pipeline(pipeline, messages, 1000)
