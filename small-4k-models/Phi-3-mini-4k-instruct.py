@@ -32,8 +32,8 @@ pipe = pipeline(
 generation_args = {
 		"max_new_tokens": 1000,
 		"return_full_text": False,
-		"temperature": 0.0,
-		"do_sample": False,
+		"temperature": 0.8,
+		"do_sample": True,	# False if temperature is 0.0
 }
 
 start_time = time.time()
