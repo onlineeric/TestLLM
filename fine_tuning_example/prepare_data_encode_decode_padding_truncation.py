@@ -1,6 +1,3 @@
-import pandas as pd
-import datasets
-
 from pprint import pprint
 from transformers import AutoTokenizer
 
