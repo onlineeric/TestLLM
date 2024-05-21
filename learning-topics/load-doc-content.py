@@ -24,11 +24,16 @@ def get_formatted_input(messages, context):
 
 		conversation = '\n\n'.join(["User: " + item["content"] if item["role"] == "user" else "Assistant: " + item["content"] for item in messages]) + "\n\nAssistant:"
 		formatted_input = system + "\n\n" + context + "\n\n" + conversation
+		print('$$$$$$ formatted_input:', formatted_input);
 		
 		return formatted_input
 
 formatted_input = get_formatted_input(messages, document)
+
+start_time = time.time()
 tokenized_prompt = tokenizer(tokenizer.bos_token + formatted_input, return_tensors="pt").to(model.device)
+end_time = time.time()
+print("$$$$$$ tokenized prompt: ", end_time - start_time, "seconds")
 
 terminators = [
 		tokenizer.eos_token_id,
