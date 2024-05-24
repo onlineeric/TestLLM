@@ -1,3 +1,4 @@
+import torch
 def inference(text, model, tokenizer, max_input_tokens=1000, max_output_tokens=100):
 	# Tokenize
 	input_ids = tokenizer.encode(
@@ -6,12 +7,13 @@ def inference(text, model, tokenizer, max_input_tokens=1000, max_output_tokens=1
 					truncation=True,
 					max_length=max_input_tokens
 	)
-
+ 
 	# Generate
-	device = model.device
+	device = torch.device("cuda")
 	generated_tokens_with_prompt = model.generate(
 		input_ids=input_ids.to(device),
-		max_length=max_output_tokens
+		max_length=max_output_tokens,
+		pad_token_id=tokenizer.eos_token_id
 	)
 
 	# Decode
