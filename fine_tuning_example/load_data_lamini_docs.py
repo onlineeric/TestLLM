@@ -1,4 +1,5 @@
 import itertools
+import jsonlines
 
 from datasets import load_dataset
 
@@ -17,9 +18,14 @@ prompt_template_qa = """
 ### Answer:
 {answer}
 """
+finetuning_dataset = []
 
 print("Pretrained dataset:")
 for i in top_n:
   text_with_prompt_template = prompt_template_qa.format(question=i["question"], answer=i["answer"])
   print(text_with_prompt_template)
-  
+  finetuning_dataset.append(text_with_prompt_template)
+
+# Save the processed dataset
+with jsonlines.open(f'lamini_docs_processed.jsonl', 'w') as writer:
+  writer.write_all(finetuning_dataset)
