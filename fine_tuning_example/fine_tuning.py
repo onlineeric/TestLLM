@@ -1,3 +1,14 @@
+""" Fine-tuning a model steps:
+- load training data, from local file or from hugging face dataset
+		- training dataset
+		- test dataset
+		- test dataset around 10% of training dataset
+- create `TrainingArguments` , import from `Transformer`
+- create `Trainer` class, import from `Transformer`
+- run the training: `trainer.train()`
+- save the trained model: `trainer.save_model(save_dir)`
+"""
+
 import logging
 import torch
 import time
@@ -28,23 +39,21 @@ training_config = {
 
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 tokenizer.pad_token = tokenizer.eos_token
+
+# load training dataset and test dataset
 train_dataset, test_dataset = tokenize_and_split_data(training_config, tokenizer)
-
-# trim train_dataset and test_dataset to 10 samples
-train_dataset = train_dataset
-test_dataset = test_dataset
-
 print(train_dataset)
 print(test_dataset)
 
+# load data model
 base_model = AutoModelForCausalLM.from_pretrained(model_name)
 device = torch.device("cuda")
 base_model.to(device)
 
 test_text = test_dataset[0]['question']
-print("$$$ Question input (test):", test_text)
-print(f"$$$ Correct answer from Lamini docs: {test_dataset[0]['answer']}")
-print("$$$ Model's answer: ")
+print("\n$$$ Question input (test):\n", test_text)
+print(f"$$$ Correct answer from Lamini docs\n: {test_dataset[0]['answer']}")
+print("$$$ Model's answer before training:\n")
 print(inference(test_text, base_model, tokenizer))
 
 max_steps = 280 # Set to -1 to train for all steps
@@ -93,14 +102,14 @@ training_args = TrainingArguments(
 )
 
 model_flops = (
-  base_model.floating_point_ops(
-    {
-       "input_ids": torch.zeros(
-           (1, training_config["model"]["max_length"])
-      ),
-    }
-  )
-  * training_args.gradient_accumulation_steps
+	base_model.floating_point_ops(
+		{
+			 "input_ids": torch.zeros(
+					 (1, training_config["model"]["max_length"])
+			),
+		}
+	)
+	* training_args.gradient_accumulation_steps
 )
 
 print(base_model)
@@ -110,10 +119,10 @@ print("Flops", model_flops / 1e9, "GFLOPs")
 print("$$$ Start training model...")
 train_start = time.time()
 trainer = Trainer(
-    model=base_model,
-    args=training_args,
-    train_dataset=train_dataset,
-    eval_dataset=test_dataset,
+		model=base_model,
+		args=training_args,
+		train_dataset=train_dataset,
+		eval_dataset=test_dataset,
 )
 
 training_output = trainer.train()
@@ -121,8 +130,8 @@ training_output = trainer.train()
 train_end = time.time()
 print("$$$ Training time:", train_end - train_start, "seconds")
 
+# Save the trained model
 save_dir = f'{output_dir}/final'
-
 trainer.save_model(save_dir)
 #save_dir = "trained_models/lamini_docs_280_steps_20240525_1339/final"
 print("Saved model to:", save_dir)
