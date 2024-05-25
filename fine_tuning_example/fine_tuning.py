@@ -1,6 +1,7 @@
 import logging
 import torch
 import time
+from pprint import pprint
 
 from transformers import AutoTokenizer, AutoModelForCausalLM, Trainer, TrainingArguments
 from utilities import tokenize_and_split_data
@@ -10,7 +11,8 @@ logger = logging.getLogger(__name__)
 
 dataset_path = "lamini/lamini_docs"
 
-model_name = "EleutherAI/pythia-70m"
+#model_name = "EleutherAI/pythia-70m"
+model_name = "EleutherAI/pythia-410m"
 
 training_config = {
 	"model": {
@@ -28,10 +30,12 @@ tokenizer = AutoTokenizer.from_pretrained(model_name)
 tokenizer.pad_token = tokenizer.eos_token
 train_dataset, test_dataset = tokenize_and_split_data(training_config, tokenizer)
 
+# trim train_dataset and test_dataset to 10 samples
+train_dataset = train_dataset
+test_dataset = test_dataset
+
 print(train_dataset)
 print(test_dataset)
-
-
 
 base_model = AutoModelForCausalLM.from_pretrained(model_name)
 device = torch.device("cuda")
@@ -43,7 +47,7 @@ print(f"$$$ Correct answer from Lamini docs: {test_dataset[0]['answer']}")
 print("$$$ Model's answer: ")
 print(inference(test_text, base_model, tokenizer))
 
-max_steps = 200 # Set to -1 to train for all steps
+max_steps = 280 # Set to -1 to train for all steps
 num_train_epochs = 1
 
 trained_model_name = f"lamini_docs_{max_steps}_steps_{time.strftime('%Y%m%d_%H%M')}"
@@ -55,7 +59,7 @@ training_args = TrainingArguments(
 	learning_rate=1.0e-5,
 
 	# Number of training epochs
-	num_train_epochs=2,
+	num_train_epochs=num_train_epochs,
 
 	# Max steps to train for (each step is a batch of data)
 	# Overrides num_train_epochs, if not -1
@@ -93,7 +97,7 @@ model_flops = (
     {
        "input_ids": torch.zeros(
            (1, training_config["model"]["max_length"])
-      )
+      ),
     }
   )
   * training_args.gradient_accumulation_steps
@@ -112,26 +116,26 @@ trainer = Trainer(
     eval_dataset=test_dataset,
 )
 
-#training_output = trainer.train()
+training_output = trainer.train()
 
 train_end = time.time()
 print("$$$ Training time:", train_end - train_start, "seconds")
 
 save_dir = f'{output_dir}/final'
-save_dir = "trained_models/lamini_docs_200_steps_20240524_2339/final"
 
-#trainer.save_model(save_dir)
+trainer.save_model(save_dir)
+#save_dir = "trained_models/lamini_docs_280_steps_20240525_1339/final"
 print("Saved model to:", save_dir)
 
 finetuned_slightly_model = AutoModelForCausalLM.from_pretrained(save_dir, local_files_only=True)
-finetuned_slightly_model.to(device) 
+finetuned_slightly_model.to(device)
 
 for i in range(5):
 	test_question = test_dataset[i]['question']
 	print("\n$$$ Question input (test):", test_question)
 
 	print("$$$ Finetuned slightly model's answer: ")
-	print(inference(test_question, finetuned_slightly_model, tokenizer))
+	print(inference(test_question, finetuned_slightly_model, tokenizer, 1000, 200))
 
 	test_answer = test_dataset[i]['answer']
 	print("$$$ Target answer output (test):", test_answer)
