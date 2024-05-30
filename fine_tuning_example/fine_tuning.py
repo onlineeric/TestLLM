@@ -22,8 +22,8 @@ logger = logging.getLogger(__name__)
 
 dataset_path = "lamini/lamini_docs"
 
-#model_name = "EleutherAI/pythia-70m"
-model_name = "EleutherAI/pythia-410m"
+model_name = "EleutherAI/pythia-70m"
+#model_name = "EleutherAI/pythia-410m"
 
 training_config = {
 	"model": {
