@@ -40,7 +40,7 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 model.to(device)
 
 trained_model_name = f"CookingRecipes_{time.strftime('%Y%m%d_%H%M')}"
-output_dir = f"trained_models/{trained_model_name}"
+output_dir = f"gitignore_trained_models/{trained_model_name}"
 
 # Define the training arguments
 training_args = TrainingArguments(
@@ -64,7 +64,7 @@ trainer = Trainer(
 trainer.train()
 
 # Save the model
-# model.save_pretrained("./trained_model")
-# tokenizer.save_pretrained("./trained_model")
+# model.save_pretrained("./gitignore_trained_models")
+# tokenizer.save_pretrained("./gitignore_trained_models")
 save_dir = f'{output_dir}/final'
 trainer.save_model(save_dir)

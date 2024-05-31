@@ -60,7 +60,7 @@ max_steps = 280 # Set to -1 to train for all steps
 num_train_epochs = 1
 
 trained_model_name = f"lamini_docs_{max_steps}_steps_{time.strftime('%Y%m%d_%H%M')}"
-output_dir = f"trained_models/{trained_model_name}"
+output_dir = f"gitignore_trained_models/{trained_model_name}"
 
 training_args = TrainingArguments(
 
@@ -133,7 +133,7 @@ print("$$$ Training time:", train_end - train_start, "seconds")
 # Save the trained model
 save_dir = f'{output_dir}/final'
 trainer.save_model(save_dir)
-#save_dir = "trained_models/lamini_docs_280_steps_20240525_1339/final"
+#save_dir = "gitignore_trained_models/lamini_docs_280_steps_20240525_1339/final"
 print("Saved model to:", save_dir)
 
 finetuned_slightly_model = AutoModelForCausalLM.from_pretrained(save_dir, local_files_only=True)
