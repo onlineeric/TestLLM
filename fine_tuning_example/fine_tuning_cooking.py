@@ -7,7 +7,7 @@ import time
 dataset = load_dataset('CodeKapital/CookingRecipes')
 
 # Select only the first 1000 samples
-dataset = dataset['train'].select(range(10))
+dataset = dataset['train'].select(range(100))
 
 # Load the tokenizer and model
 model_name = "EleutherAI/pythia-70m"
@@ -16,24 +16,25 @@ tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForCausalLM.from_pretrained(model_name)
 
 # Tokenize the dataset
-def tokenize_function(examples):
-	# return tokenizer(examples['title'] + " " + examples['ingredients'] + " " + examples['directions'], padding="max_length", truncation=True, max_length=512)
-	# Ensure all necessary keys are present and not empty
-	title = examples.get('title', "")
-	print('$$$ title: ', title)
-	ingredients = examples.get('ingredients', "")
-	directions = examples.get('directions', "")
+# def tokenize_function(examples):
+# 	# return tokenizer(examples['title'] + " " + examples['ingredients'] + " " + examples['directions'], padding="max_length", truncation=True, max_length=512)
+# 	# Ensure all necessary keys are present and not empty
+# 	title = examples.get('title', "")
+# 	print('$$$ title: ', title)
+# 	ingredients = examples.get('ingredients', "")
+# 	directions = examples.get('directions', "")
 	
-	# Combine the text fields
-	text = title + " " + ingredients + " " + directions
+# 	# Combine the text fields
+# 	text = title + " " + ingredients + " " + directions
 	
-	# Tokenize the combined text
-	return tokenizer(text, padding="max_length", truncation=True, max_length=512)
+# 	# Tokenize the combined text
+# 	return tokenizer(text, padding="max_length", truncation=True, max_length=512)
 
-tokenized_datasets = dataset.map(tokenize_function, batched=True)
+# tokenized_datasets = dataset.map(tokenize_function, batched=True)
 
 # Prepare for training
-train_dataset = tokenized_datasets["train"]
+# train_dataset = tokenized_datasets["train"]
+train_dataset = dataset['title', 'ingredients', 'directions', 'NER']
 
 # Check if a GPU is available and set the device accordingly
 device = "cuda" if torch.cuda.is_available() else "cpu"
