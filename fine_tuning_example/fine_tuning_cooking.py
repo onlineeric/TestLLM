@@ -20,10 +20,16 @@ print("$$$ load dataset done")
 
 # Tokenize the dataset
 def tokenize_function(examples):
-	return tokenizer(examples["directions"], truncation=True, max_length=2048)
+	return tokenizer(examples["title"],
+				text_pair=examples["directions"],
+				text_target=examples["ingredients"],
+				text_pair_target=examples["NER"],
+				truncation=True,
+				padding="max_length",
+				max_length=1024)
 
-tokenized_train_datasets = train_dataset.map(tokenize_function, batched=True, remove_columns=["title", "ingredients", "NER", "link", "source"])
-tokenized_eval_datasets = eval_dataset.map(tokenize_function, batched=True, remove_columns=["title", "ingredients", "NER", "link", "source"])
+tokenized_train_datasets = train_dataset.map(tokenize_function, batched=True)
+tokenized_eval_datasets = eval_dataset.map(tokenize_function, batched=True)
 
 # Set up the data collator
 data_collator = DataCollatorForLanguageModeling(
