@@ -2,11 +2,11 @@ from datasets import load_dataset
 from transformers import AutoTokenizer, AutoModelForCausalLM, TrainingArguments, Trainer, DataCollatorForLanguageModeling, EarlyStoppingCallback
 
 # Load the pre-trained model and tokenizer
-#trained_model_name = "pythia-70m-finetuned-cooking_recipes"
-trained_model_name = "pythia-410m-finetuned-cooking_recipes"
+trained_model_name = "pythia-70m-finetuned-cooking_recipes"
+#trained_model_name = "pythia-410m-finetuned-cooking_recipes"
 output_dir = f"gitignore_trained_models/{trained_model_name}"
-#model_id = "EleutherAI/pythia-70m"
-model_id = "EleutherAI/pythia-410m"
+model_id = "EleutherAI/pythia-70m"
+#model_id = "EleutherAI/pythia-410m"
 model = AutoModelForCausalLM.from_pretrained(model_id)
 model.to('cuda')
 tokenizer = AutoTokenizer.from_pretrained(model_id)
@@ -20,10 +20,7 @@ print("$$$ load dataset done")
 
 # Tokenize the dataset
 def tokenize_function(examples):
-	return tokenizer(examples["directions"], 
-				#return_tensors="np", 
-				truncation=True, 
-				max_length=512)
+	return tokenizer(examples["directions"], truncation=True, max_length=2048)
 
 tokenized_train_datasets = train_dataset.map(tokenize_function, batched=True, remove_columns=["title", "ingredients", "NER", "link", "source"])
 tokenized_eval_datasets = eval_dataset.map(tokenize_function, batched=True, remove_columns=["title", "ingredients", "NER", "link", "source"])
