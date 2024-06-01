@@ -10,17 +10,15 @@ tokenizer.pad_token = tokenizer.eos_token
 
 # Load the dataset from the local directory
 dataset = load_dataset("./gitignore_datasets/cooking_recipes")
-train_dataset = dataset["train"].select(range(800))
-eval_dataset = dataset["train"].select(range(800, 1000))
+train_dataset = dataset["train"].select(range(4000))
+eval_dataset = dataset["train"].select(range(4000, 5000))
 
 # Tokenize the dataset
 def tokenize_function(examples):
 	return tokenizer(examples["directions"], return_tensors="np", truncation=True, max_length=512)
 
-print("$$$$$$ Tokenizing the dataset started...")
 tokenized_train_datasets = train_dataset.map(tokenize_function, batched=True, remove_columns=["title", "ingredients", "NER", "link", "source"])
 tokenized_eval_datasets = eval_dataset.map(tokenize_function, batched=True, remove_columns=["title", "ingredients", "NER", "link", "source"])
-print("$$$$$$ Tokenizing the dataset ended")
 
 # Set up the data collator
 data_collator = DataCollatorForLanguageModeling(
