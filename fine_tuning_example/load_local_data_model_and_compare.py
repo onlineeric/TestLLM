@@ -13,7 +13,7 @@ hf_model = AutoModelForCausalLM.from_pretrained(model_id)
 hf_model.to('cuda')
 hf_tokenizer = AutoTokenizer.from_pretrained(model_id)
 
-test_dataset = load_dataset("./gitignore_datasets/cooking_recipes", split='train[:5]')
+test_dataset = load_dataset("../gitignore_datasets/cooking_recipes", split='train[:5]')
 
 for i in range(3):
 	test_question = f"How to make {test_dataset[i]["title"]}?"

@@ -13,7 +13,7 @@ tokenizer = AutoTokenizer.from_pretrained(model_id)
 tokenizer.pad_token = tokenizer.eos_token
 
 # Load the dataset from the local directory
-dataset = load_dataset("./gitignore_datasets/cooking_recipes", split='train[:1000]')
+dataset = load_dataset("../gitignore_datasets/cooking_recipes", split='train[:1000]')
 train_dataset = dataset.select(range(800))
 eval_dataset = dataset.select(range(800, 1000))
 print("$$$ load dataset done")
