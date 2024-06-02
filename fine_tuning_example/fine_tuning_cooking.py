@@ -3,27 +3,27 @@ from transformers import AutoTokenizer, AutoModelForCausalLM, TrainingArguments,
 
 # Load the pre-trained model and tokenizer
 trained_model_name = "pythia-70m-finetuned-cooking_recipes"
-#trained_model_name = "pythia-410m-finetuned-cooking_recipes"
+# trained_model_name = "pythia-410m-finetuned-cooking_recipes"
 output_dir = f"gitignore_trained_models/{trained_model_name}"
 model_id = "EleutherAI/pythia-70m"
-#model_id = "EleutherAI/pythia-410m"
+# model_id = "EleutherAI/pythia-410m"
 model = AutoModelForCausalLM.from_pretrained(model_id)
 model.to('cuda')
 tokenizer = AutoTokenizer.from_pretrained(model_id)
 tokenizer.pad_token = tokenizer.eos_token
 
 # Load the dataset from the local directory
-dataset = load_dataset("./gitignore_datasets/cooking_recipes", split='train[:500]')
-train_dataset = dataset.select(range(400))
-eval_dataset = dataset.select(range(400, 500))
+dataset = load_dataset("./gitignore_datasets/cooking_recipes", split='train[:10000]')
+train_dataset = dataset.select(range(8000))
+eval_dataset = dataset.select(range(8000, 10000))
 print("$$$ load dataset done")
 
 # Tokenize the dataset
 def tokenize_function(examples):
 	return tokenizer(examples["title"],
 				text_pair=examples["directions"],
-				text_target=examples["ingredients"],
-				text_pair_target=examples["NER"],
+				# text_target=examples["ingredients"],
+				# text_pair_target=examples["NER"],
 				truncation=True,
 				padding="max_length",
 				max_length=1024)
@@ -48,7 +48,7 @@ training_args = TrainingArguments(
 	per_device_eval_batch_size=4,
 	num_train_epochs=3,
 	weight_decay=0.01,
-	logging_steps=500,
+	logging_steps=1000,
 	load_best_model_at_end=True,	
 )
 

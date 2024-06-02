@@ -2,8 +2,8 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 from inference import inference
 from datasets import load_dataset
 
-model_id = "EleutherAI/pythia-410m"
-finetuned_model_dir = "./gitignore_trained_models/pythia-410m-finetuned-cooking_recipes/final"
+model_id = "EleutherAI/pythia-70m"
+finetuned_model_dir = "./gitignore_trained_models/pythia-70m-finetuned-cooking_recipes/final"
 
 finetuned_slightly_model = AutoModelForCausalLM.from_pretrained(finetuned_model_dir, local_files_only=True)
 finetuned_slightly_model.to('cuda')
@@ -23,4 +23,4 @@ for i in range(3):
 	print(inference(test_question, hf_model, hf_tokenizer, 1000, 200))
  
 	print("$$$ Finetuned slightly model's answer: ")
-	print(inference(test_question, finetuned_slightly_model, finetuned_slightly_tokenizer, 1000, 200))
+	print(inference(test_question, finetuned_slightly_model, finetuned_slightly_tokenizer, 1000, 500))
