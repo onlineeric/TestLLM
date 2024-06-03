@@ -2,7 +2,7 @@ from datasets import load_dataset
 from transformers import AutoTokenizer, AutoModelForCausalLM, TrainingArguments, Trainer, DataCollatorForLanguageModeling, EarlyStoppingCallback
 import os
 
-model_name = "pythia-410m"	# "pythia-70m", "pythia-160m", "pythia-410m"
+model_name = "pythia-160m"	# "pythia-70m", "pythia-160m", "pythia-410m"
 model_id = f"EleutherAI/{model_name}"
 trained_model_name = f"{model_name}_ft_cooking"
 output_dir = f"gitignore_trained_models/{trained_model_name}"
@@ -10,14 +10,14 @@ output_dir = f"gitignore_trained_models/{trained_model_name}"
 hf_token = os.getenv('HUGGINGFACE_TOKEN')
 
 # Load the pre-trained model and tokenizer
-model = AutoModelForCausalLM.from_pretrained(model_id, token=hf_token)
-tokenizer = AutoTokenizer.from_pretrained(model_id, token=hf_token)
+model = AutoModelForCausalLM.from_pretrained(model_id, token=hf_token, device_map='auto')
+tokenizer = AutoTokenizer.from_pretrained(model_id, token=hf_token, device_map='auto')
 tokenizer.pad_token = tokenizer.eos_token
 
 # Load the dataset from the local directory
-dataset = load_dataset("../gitignore_datasets/cooking_recipes", split='train[:10]')
-train_dataset = dataset.select(range(8))
-eval_dataset = dataset.select(range(8, 10))
+dataset = load_dataset("../gitignore_datasets/cooking_recipes", split='train[:10000]')
+train_dataset = dataset.select(range(8000))
+eval_dataset = dataset.select(range(8000, 10000))
 print("\n$$$ load dataset done\n")
 
 # Tokenize the dataset
@@ -61,7 +61,7 @@ training_args = TrainingArguments(
 	eval_strategy="epoch",
 	#eval_strategy="no",
 	save_strategy="epoch",
-	learning_rate=2e-5,
+	learning_rate=1e-5,
 	per_device_train_batch_size=4,
 	per_device_eval_batch_size=4,
 	#gradient_accumulation_steps=2,  # Simulate a larger batch size
