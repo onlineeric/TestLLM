@@ -2,7 +2,7 @@ from datasets import load_dataset
 from transformers import AutoTokenizer, AutoModelForCausalLM, TrainingArguments, Trainer, DataCollatorForLanguageModeling, EarlyStoppingCallback
 import os
 
-model_name = "pythia-160m"	# "pythia-70m", "pythia-160m", "pythia-410m"
+model_name = "pythia-410m"	# "pythia-70m", "pythia-160m", "pythia-410m"
 model_id = f"EleutherAI/{model_name}"
 trained_model_name = f"{model_name}_ft_cooking"
 output_dir = f"gitignore_trained_models/{trained_model_name}"
@@ -15,15 +15,16 @@ tokenizer = AutoTokenizer.from_pretrained(model_id, token=hf_token)
 tokenizer.pad_token = tokenizer.eos_token
 
 # Load the dataset from the local directory
-dataset = load_dataset("../gitignore_datasets/cooking_recipes", split='train[:1000]')
-train_dataset = dataset.select(range(800))
-eval_dataset = dataset.select(range(800, 1000))
+dataset = load_dataset("../gitignore_datasets/cooking_recipes", split='train[:10]')
+train_dataset = dataset.select(range(8))
+eval_dataset = dataset.select(range(8, 10))
 print("\n$$$ load dataset done\n")
 
 # Tokenize the dataset
 def formatting_prompts_func(examples):
 	text_template = "Tell me how to make {}"
-	text_pair_template = """To make {}, you need the following ingredients:
+	text_pair_template = """
+To make {}, you need the following ingredients:
 {}
 
 Cooking directions:
@@ -37,7 +38,7 @@ Cooking directions:
 		# Must add EOS_TOKEN (tokenizer.eos_token), otherwise your generation will go on forever!
 		text = text_template.format(title) + tokenizer.eos_token
 		texts.append(text)
-		# ingredient is a list, convert it to a string by joining the elements with a comma following a space
+		# ingredient and direction is a list in string, convert it to a list and joining the elements
 		ingredient_text = ", ".join(eval(ingredient))
 		direction_text = "* " + "\n* ".join(eval(direction))
 		text_pair = text_pair_template.format(title, ingredient_text, direction_text) + tokenizer.eos_token
