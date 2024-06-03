@@ -22,32 +22,27 @@ print("\n$$$ load dataset done\n")
 
 # Tokenize the dataset
 def formatting_prompts_func(examples):
-	alpaca_prompt = """
-	### Instruction:
-	{}
+	text_template = "Tell me how to make {}"
+	text_pair_template = """To make {}, you need the following ingredients:
+{}
 
-	### Input:
-	{}
-
-	### Response:
-	{}"""
-
-	response_template = """	Ingredients: {}
-	Steps: {}"""
-
+Cooking directions:
+{}"""
 	titles			= examples["title"]
 	ingredients		= examples["ingredients"]
 	directions		= examples["directions"]
 	texts = []
+	text_pairs = []
 	for title, ingredient, direction in zip(titles, ingredients, directions):
 		# Must add EOS_TOKEN (tokenizer.eos_token), otherwise your generation will go on forever!
-		text = alpaca_prompt.format(
-			"Tell me how to make this dish. Please include the ingredients and the steps to make it.",
-			title,
-			response_template.format(ingredient, direction)
-			) + tokenizer.eos_token
+		text = text_template.format(title) + tokenizer.eos_token
 		texts.append(text)
-	return tokenizer(texts, truncation=True, padding="max_length", max_length=512)
+		# ingredient is a list, convert it to a string by joining the elements with a comma following a space
+		ingredient_text = ", ".join(eval(ingredient))
+		direction_text = "* " + "\n* ".join(eval(direction))
+		text_pair = text_pair_template.format(title, ingredient_text, direction_text) + tokenizer.eos_token
+		text_pairs.append(text_pair)
+	return tokenizer(text=texts, text_pair=text_pairs, truncation=True, padding="max_length", max_length=512)
 
 tokenized_train_datasets = train_dataset.map(formatting_prompts_func, batched=True)
 tokenized_eval_datasets = eval_dataset.map(formatting_prompts_func, batched=True)
