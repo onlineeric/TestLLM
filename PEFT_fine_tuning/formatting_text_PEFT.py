@@ -5,7 +5,7 @@ from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
 
 model_name = "pythia-160m"  # "pythia-70m", "pythia-160m", "pythia-410m"
 model_id = f"EleutherAI/{model_name}"
-trained_model_name = f"{model_name}_ft_cooking"
+trained_model_name = f"{model_name}_ft_PEFT_cooking"
 output_dir = f"gitignore_trained_models/{trained_model_name}"
 
 hf_token = os.getenv('HUGGINGFACE_TOKEN')
@@ -22,7 +22,7 @@ model = prepare_model_for_kbit_training(model)
 lora_config = LoraConfig(
 	r=8,
 	lora_alpha=32,
-	target_modules=["q_proj", "v_proj"],
+	target_modules=["attention.query_key_value", "attention.dense"], # target_modules inspected by inspect_model_architecture.py
 	lora_dropout=0.05,
 	bias="none",
 )
