@@ -1,27 +1,39 @@
 from datasets import load_dataset
-from transformers import AutoTokenizer, AutoModelWithHeads, TrainingArguments, Trainer, DataCollatorForLanguageModeling, EarlyStoppingCallback
+from transformers import AutoTokenizer, AutoModelForCausalLM, TrainingArguments, Trainer, DataCollatorForLanguageModeling, EarlyStoppingCallback
 import os
+from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
 
 model_name = "pythia-160m"  # "pythia-70m", "pythia-160m", "pythia-410m"
 model_id = f"EleutherAI/{model_name}"
-trained_model_name = f"{model_name}_PEFT_cooking"
+trained_model_name = f"{model_name}_ft_cooking"
 output_dir = f"gitignore_trained_models/{trained_model_name}"
 
 hf_token = os.getenv('HUGGINGFACE_TOKEN')
 
-# Load the pre-trained model and tokenizer with adapters
-model = AutoModelWithHeads.from_pretrained(model_id, token=hf_token, device_map='auto')
-model.add_adapter("cooking_adapter")
-model.add_sequence_classification_head("cooking_adapter", num_labels=1)
-model.train_adapter("cooking_adapter")
-
+# Load the pre-trained model and tokenizer
+model = AutoModelForCausalLM.from_pretrained(model_id, token=hf_token, device_map='auto')
 tokenizer = AutoTokenizer.from_pretrained(model_id, token=hf_token, device_map='auto')
 tokenizer.pad_token = tokenizer.eos_token
 
+print("\n$$$ prepare model for kbit training start...\n")
+
+# Prepare the model for LoRA
+model = prepare_model_for_kbit_training(model)
+lora_config = LoraConfig(
+	r=8,
+	lora_alpha=32,
+	target_modules=["q_proj", "v_proj"],
+	lora_dropout=0.05,
+	bias="none",
+)
+model = get_peft_model(model, lora_config)
+
+print("\n$$$ prepare model for kbit training done\n")
+
 # Load the dataset from the local directory
-dataset = load_dataset("../gitignore_datasets/cooking_recipes", split='train[:100]')
-train_dataset = dataset.select(range(80))
-eval_dataset = dataset.select(range(80, 100))
+dataset = load_dataset("../gitignore_datasets/cooking_recipes", split='train[:10]')
+train_dataset = dataset.select(range(8))
+eval_dataset = dataset.select(range(8, 10))
 print("\n$$$ load dataset done\n")
 
 # Tokenize the dataset
@@ -65,7 +77,7 @@ training_args = TrainingArguments(
 	eval_strategy="epoch",
 	#eval_strategy="no",
 	save_strategy="epoch",
-	learning_rate=1e-5,
+	learning_rate=1e-4,
 	per_device_train_batch_size=4,
 	per_device_eval_batch_size=4,
 	#gradient_accumulation_steps=2,  # Simulate a larger batch size
