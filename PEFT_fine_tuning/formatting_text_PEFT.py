@@ -3,7 +3,7 @@ from transformers import AutoTokenizer, AutoModelForCausalLM, TrainingArguments,
 import os
 from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
 
-model_name = "pythia-160m"  # "pythia-70m", "pythia-160m", "pythia-410m"
+model_name = "pythia-410m"  # "pythia-70m", "pythia-160m", "pythia-410m"
 model_id = f"EleutherAI/{model_name}"
 trained_model_name = f"{model_name}_ft_PEFT_cooking"
 output_dir = f"gitignore_trained_models/{trained_model_name}"
@@ -31,9 +31,9 @@ model = get_peft_model(model, lora_config)
 print("\n$$$ prepare model for kbit training done\n")
 
 # Load the dataset from the local directory
-dataset = load_dataset("../gitignore_datasets/cooking_recipes", split='train[:10]')
-train_dataset = dataset.select(range(8))
-eval_dataset = dataset.select(range(8, 10))
+dataset = load_dataset("../gitignore_datasets/cooking_recipes", split='train[:2000000]')
+train_dataset = dataset.select(range(1600000))
+eval_dataset = dataset.select(range(1600000, 2000000))
 print("\n$$$ load dataset done\n")
 
 # Tokenize the dataset
@@ -61,7 +61,9 @@ Cooking directions:
 		text_pairs.append(text_pair)
 	return tokenizer(text=texts, text_pair=text_pairs, truncation=True, padding="max_length", max_length=512)
 
+print("\n$$$ start tokenizing train dataset\n")
 tokenized_train_datasets = train_dataset.map(formatting_prompts_func, batched=True)
+print("\n$$$ start tokenizing eval dataset\n")
 tokenized_eval_datasets = eval_dataset.map(formatting_prompts_func, batched=True)
 print("\n$$$ tokenize datasets done\n")
 
@@ -74,9 +76,10 @@ data_collator = DataCollatorForLanguageModeling(
 # Set up the training arguments
 training_args = TrainingArguments(
 	output_dir=output_dir,
-	eval_strategy="epoch",
-	#eval_strategy="no",
-	save_strategy="epoch",
+	evaluation_strategy="steps",  # Evaluate at each logging step
+	eval_steps=500,  # Evaluate every 500 steps
+	save_strategy="steps",
+	save_steps=500,  # Save checkpoint every 500 steps
 	learning_rate=1e-4,
 	per_device_train_batch_size=4,
 	per_device_eval_batch_size=4,
@@ -100,7 +103,9 @@ trainer = Trainer(
 )
 
 # Fine-tune the model
+print("\n$$$ start training\n")
 trainer.train()
 
 # Save the fine-tuned model
+print("\n$$$ saving model\n")
 trainer.save_model(f"{output_dir}/final")
