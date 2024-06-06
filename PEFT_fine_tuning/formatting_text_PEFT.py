@@ -31,9 +31,9 @@ model = get_peft_model(model, lora_config)
 print("\n$$$ prepare model for kbit training done\n")
 
 # Load the dataset from the local directory
-dataset = load_dataset("../gitignore_datasets/cooking_recipes", split='train[:300000]')
-train_dataset = dataset.select(range(240000))
-eval_dataset = dataset.select(range(240000, 300000))
+dataset = load_dataset("../gitignore_datasets/cooking_recipes", split='train[:80000]')
+train_dataset = dataset.select(range(64000))
+eval_dataset = dataset.select(range(64000, 80000))
 print("\n$$$ load dataset done\n")
 
 # Tokenize the dataset
@@ -77,7 +77,7 @@ data_collator = DataCollatorForLanguageModeling(
 # Set up the training arguments
 training_args = TrainingArguments(
 	output_dir=output_dir,
-	evaluation_strategy="steps",  # Evaluate at each logging step
+	eval_strategy="steps",  # Evaluate at each logging step
 	eval_steps=500,  # Evaluate every 500 steps
 	save_strategy="steps",
 	save_steps=500,  # Save checkpoint every 500 steps
