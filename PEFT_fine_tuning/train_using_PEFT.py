@@ -22,7 +22,7 @@ peft_config = LoraConfig(
 	bias="none",
 	task_type="CAUSAL_LM",
 )
-model.add_adapter(peft_config)
+model.add_adapter(peft_config, adapter_name="peft_adapter")
 
 # Load the dataset from the local directory
 dataset = load_dataset("../gitignore_datasets/cooking_recipes", split='train[:40]')
@@ -103,6 +103,6 @@ trainer.train()
 # Save the fine-tuned model
 final_model_dir = f"{output_dir}/final"
 print(f"\n$$$ Saving model to {final_model_dir} \n")
-#trainer.save_model(f"{output_dir}/final")
+#trainer.save_model(final_model_dir)
+#tokenizer.save_pretrained(final_model_dir)
 model.save_pretrained(final_model_dir)
-tokenizer.save_pretrained(final_model_dir)
