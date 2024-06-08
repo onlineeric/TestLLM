@@ -31,14 +31,14 @@ model = get_peft_model(model, lora_config)
 print("\n$$$ prepare model for kbit training done\n")
 
 # Load the dataset from the local directory
-dataset = load_dataset("../gitignore_datasets/cooking_recipes", split='train[:80000]')
-train_dataset = dataset.select(range(64000))
-eval_dataset = dataset.select(range(64000, 80000))
+dataset = load_dataset("../gitignore_datasets/cooking_recipes", split='train[:40000]')
+train_dataset = dataset.select(range(32000))
+eval_dataset = dataset.select(range(32000, 40000))
 print("\n$$$ load dataset done\n")
 
 # Tokenize the dataset
 def formatting_prompts_func(examples):
-	text_template = "How to make {}"
+	text_template = "Tell me how to make {}"
 	text_pair_template = """
 To make {}, you need the following ingredients:
 {}
