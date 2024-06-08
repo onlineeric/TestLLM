@@ -31,9 +31,9 @@ model = get_peft_model(model, lora_config)
 print("\n$$$ prepare model for kbit training done\n")
 
 # Load the dataset from the local directory
-dataset = load_dataset("../gitignore_datasets/cooking_recipes", split='train[:40000]')
-train_dataset = dataset.select(range(32000))
-eval_dataset = dataset.select(range(32000, 40000))
+dataset = load_dataset("../gitignore_datasets/cooking_recipes", split='train[:10000]')
+train_dataset = dataset.select(range(8000))
+eval_dataset = dataset.select(range(8000, 10000))
 print("\n$$$ load dataset done\n")
 
 # Tokenize the dataset
@@ -83,17 +83,19 @@ def compute_metrics(eval_pred):
 # Set up the training arguments
 training_args = TrainingArguments(
 	output_dir=output_dir,
-	eval_strategy="steps",  # Evaluate at each logging step
-	eval_steps=500,  # Evaluate every 500 steps
-	save_strategy="steps",
-	save_steps=500,  # Save checkpoint every 500 steps
+	eval_strategy="epoch",		# Evaluate at each epoch
+	save_strategy="epoch",		# Save checkpoint at each epoch
+	# eval_strategy="steps",  # Evaluate at each logging step
+	# eval_steps=500,  # Evaluate every 500 steps
+	# save_strategy="steps",
+	# save_steps=500,  # Save checkpoint every 500 steps
 	learning_rate=1e-4,
 	per_device_train_batch_size=4,
 	per_device_eval_batch_size=4,
 	#gradient_accumulation_steps=2,  # Simulate a larger batch size
-	num_train_epochs=3,
+	num_train_epochs=3,	# For 1000 training records, 1 epoch with 4 batch size, there are 250 steps per epoch
 	weight_decay=0.01,
-	logging_steps=500,
+	logging_steps=2,
 	load_best_model_at_end=True,
 	#fp16=True,  # Enable mixed precision training
 	metric_for_best_model="eval_loss",
@@ -118,4 +120,5 @@ trainer.train()
 
 # Save the fine-tuned model
 print("\n$$$ saving model\n")
-trainer.save_model(f"{output_dir}/final")
+model.save_pretrained(output_dir)
+tokenizer.save_pretrained(output_dir)
