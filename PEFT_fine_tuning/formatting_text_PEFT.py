@@ -74,6 +74,12 @@ data_collator = DataCollatorForLanguageModeling(
 	mlm=False,  # Set to True if you are doing masked language modeling
 )
 
+# Function to compute metrics
+def compute_metrics(eval_pred):
+	logits, labels = eval_pred
+	loss = trainer.compute_loss(model, logits, labels)
+	return {"eval_loss": loss.item()}
+
 # Set up the training arguments
 training_args = TrainingArguments(
 	output_dir=output_dir,
@@ -90,6 +96,8 @@ training_args = TrainingArguments(
 	logging_steps=500,
 	load_best_model_at_end=True,
 	#fp16=True,  # Enable mixed precision training
+	metric_for_best_model="eval_loss",
+	greater_is_better=False,
 )
 
 # Create the Trainer object
@@ -100,6 +108,7 @@ trainer = Trainer(
 	eval_dataset=tokenized_eval_datasets,
 	tokenizer=tokenizer,
 	data_collator=data_collator,
+	compute_metrics=compute_metrics,
 	callbacks=[EarlyStoppingCallback(early_stopping_patience=3)]  # Add early stopping
 )
 
