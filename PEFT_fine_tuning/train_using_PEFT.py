@@ -25,9 +25,9 @@ peft_config = LoraConfig(
 model.add_adapter(peft_config, adapter_name="peft_adapter")
 
 # Load the dataset from the local directory
-dataset = load_dataset("../gitignore_datasets/cooking_recipes", split='train[:40]')
-train_dataset = dataset.select(range(32))
-eval_dataset = dataset.select(range(32, 40))
+dataset = load_dataset("../gitignore_datasets/cooking_recipes", split='train[:2000]')
+train_dataset = dataset.select(range(2000))
+eval_dataset = dataset.select(range(1600, 2000))
 print("\n$$$ load dataset done\n")
 
 # Tokenize the dataset
@@ -71,16 +71,16 @@ training_args = TrainingArguments(
 	# eval_strategy="epoch",
 	# save_strategy="epoch",
 	eval_strategy="steps",  # Evaluate at each logging step
-	eval_steps=12,  # Evaluate every 500 steps
+	eval_steps=150,  # Evaluate every 500 steps
 	save_strategy="steps",
-	save_steps=12,  # Save checkpoint every 500 steps
+	save_steps=150,  # Save checkpoint every 500 steps
+	logging_steps=15,
 	learning_rate=1e-4,
 	per_device_train_batch_size=4,
 	per_device_eval_batch_size=4,
 	#gradient_accumulation_steps=2,  # Simulate a larger batch size
 	num_train_epochs=3,
 	weight_decay=0.01,
-	logging_steps=4,
 	#load_best_model_at_end=True,
 	#fp16=True,  # Enable mixed precision training
 )
@@ -103,6 +103,6 @@ trainer.train()
 # Save the fine-tuned model
 final_model_dir = f"{output_dir}/final"
 print(f"\n$$$ Saving model to {final_model_dir} \n")
-#trainer.save_model(final_model_dir)
-#tokenizer.save_pretrained(final_model_dir)
+trainer.save_model(final_model_dir)
 model.save_pretrained(final_model_dir)
+tokenizer.save_pretrained(final_model_dir)
