@@ -3,6 +3,7 @@ from transformers import AutoTokenizer, AutoModelForCausalLM, TrainingArguments,
 import os
 from peft import LoraConfig
 
+
 model_name = "pythia-410m"  # "pythia-70m", "pythia-160m", "pythia-410m"
 model_id = f"EleutherAI/{model_name}"
 trained_model_name = f"{model_name}_ft_PEFT_cooking"
@@ -25,9 +26,11 @@ peft_config = LoraConfig(
 model.add_adapter(peft_config, adapter_name="peft_adapter")
 
 # Load the dataset from the local directory
-dataset = load_dataset("../gitignore_datasets/cooking_recipes", split='train[:2000]')
-train_dataset = dataset.select(range(2000))
-eval_dataset = dataset.select(range(1600, 2000))
+total_records = 100
+train_records = int(total_records * 0.9)
+dataset = load_dataset("../gitignore_datasets/cooking_recipes", split=f'train[:{total_records}]')
+train_dataset = dataset.select(range(train_records))
+eval_dataset = dataset.select(range(train_records, total_records))
 print("\n$$$ load dataset done\n")
 
 # Tokenize the dataset
@@ -37,7 +40,7 @@ def formatting_prompts_func(examples):
 To make {}, you need the following ingredients:
 {}
 
-Cooking directions:
+Cooking directions to make {}:
 {}"""
 	titles			= examples["title"]
 	ingredients		= examples["ingredients"]
@@ -49,9 +52,10 @@ Cooking directions:
 		text = text_template.format(title) + tokenizer.eos_token
 		texts.append(text)
 		# ingredient and direction is a list in string, convert it to a list and joining the elements
-		ingredient_text = ", ".join(eval(ingredient))
+		ingredient_text = "* " + "\n* ".join(eval(ingredient))
 		direction_text = "* " + "\n* ".join(eval(direction))
-		text_pair = text_pair_template.format(title, ingredient_text, direction_text) + tokenizer.eos_token
+		text_pair = text_pair_template.format(title, ingredient_text, title, direction_text) + tokenizer.eos_token
+		print("\n$$$ text_pair:", text_pair)
 		text_pairs.append(text_pair)
 	return tokenizer(text=texts, text_pair=text_pairs, truncation=True, padding="max_length", max_length=512)
 
@@ -66,20 +70,22 @@ data_collator = DataCollatorForLanguageModeling(
 )
 
 # Set up the training arguments
+batch_size = 4
+epochs = 3
 training_args = TrainingArguments(
 	output_dir=output_dir,
 	# eval_strategy="epoch",
 	# save_strategy="epoch",
 	eval_strategy="steps",  # Evaluate at each logging step
-	eval_steps=150,  # Evaluate every 500 steps
+	eval_steps=int(train_records/batch_size*epochs/10),  # Evaluate every every 10% of the training data
 	save_strategy="steps",
-	save_steps=150,  # Save checkpoint every 500 steps
-	logging_steps=15,
+	save_steps=int(train_records/batch_size*epochs/10),  # Save checkpoint every 10% of the training data
+	logging_steps=int(train_records/batch_size*epochs/20), # Log every 5% of the training data
 	learning_rate=1e-4,
-	per_device_train_batch_size=4,
-	per_device_eval_batch_size=4,
+	per_device_train_batch_size=batch_size,
+	per_device_eval_batch_size=batch_size,
 	#gradient_accumulation_steps=2,  # Simulate a larger batch size
-	num_train_epochs=3,
+	num_train_epochs=epochs,
 	weight_decay=0.01,
 	#load_best_model_at_end=True,
 	#fp16=True,  # Enable mixed precision training
@@ -103,6 +109,6 @@ trainer.train()
 # Save the fine-tuned model
 final_model_dir = f"{output_dir}/final"
 print(f"\n$$$ Saving model to {final_model_dir} \n")
-trainer.save_model(final_model_dir)
+#trainer.save_model(final_model_dir)
 model.save_pretrained(final_model_dir)
-tokenizer.save_pretrained(final_model_dir)
+#tokenizer.save_pretrained(final_model_dir)
