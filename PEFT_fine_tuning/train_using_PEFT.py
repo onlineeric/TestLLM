@@ -26,7 +26,7 @@ peft_config = LoraConfig(
 model.add_adapter(peft_config, adapter_name="peft_adapter")
 
 # Load the dataset from the local directory
-total_records = 100
+total_records = 50
 train_records = int(total_records * 0.9)
 dataset = load_dataset("../gitignore_datasets/cooking_recipes", split=f'train[:{total_records}]')
 train_dataset = dataset.select(range(train_records))
@@ -55,7 +55,6 @@ Cooking directions to make {}:
 		ingredient_text = "* " + "\n* ".join(eval(ingredient))
 		direction_text = "* " + "\n* ".join(eval(direction))
 		text_pair = text_pair_template.format(title, ingredient_text, title, direction_text) + tokenizer.eos_token
-		print("\n$$$ text_pair:", text_pair)
 		text_pairs.append(text_pair)
 	return tokenizer(text=texts, text_pair=text_pairs, truncation=True, padding="max_length", max_length=512)
 
@@ -111,4 +110,4 @@ final_model_dir = f"{output_dir}/final"
 print(f"\n$$$ Saving model to {final_model_dir} \n")
 #trainer.save_model(final_model_dir)
 model.save_pretrained(final_model_dir)
-#tokenizer.save_pretrained(final_model_dir)
+tokenizer.save_pretrained(final_model_dir)

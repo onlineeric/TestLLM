@@ -7,13 +7,14 @@ model_id = f"EleutherAI/{model_name}"
 trained_model_name = f"{model_name}_ft_PEFT_cooking"
 ft_model_dir = f"gitignore_trained_models/{trained_model_name}/final"
 
-finetuned_slightly_model = AutoModelForCausalLM.from_pretrained(model_id, device_map='auto')
-#finetuned_slightly_model.to('cuda')
-finetuned_slightly_model.load_adapter(ft_model_dir)
+# finetuned_slightly_model = AutoModelForCausalLM.from_pretrained(model_id, device_map='auto')
+# finetuned_slightly_model.load_adapter(ft_model_dir)
+# finetuned_slightly_model.enable_adapters()
+finetuned_slightly_model = AutoModelForCausalLM.from_pretrained(ft_model_dir, device_map='auto')
 finetuned_slightly_tokenizer = AutoTokenizer.from_pretrained(ft_model_dir)
 
-hf_model = AutoModelForCausalLM.from_pretrained(model_id, device_map='cuda')
-hf_tokenizer = AutoTokenizer.from_pretrained(model_id, device_map='cuda')
+hf_model = AutoModelForCausalLM.from_pretrained(model_id, device_map='auto')
+hf_tokenizer = AutoTokenizer.from_pretrained(model_id, device_map='auto')
 
 test_dataset = load_dataset("../gitignore_datasets/cooking_recipes", split='train[:5]')
 
