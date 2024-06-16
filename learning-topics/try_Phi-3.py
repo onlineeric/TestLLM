@@ -17,7 +17,7 @@ tokenizer = AutoTokenizer.from_pretrained(model_id)
 
 messages = [
 	{"role": "system", "content": "Your are a Chef providing Cooking Recipes."},
-	{"role": "user", "content": "Tell me how to make Quick Barbecue Wings"},
+	{"role": "user", "content": {}},
 ]
 
 pipe = pipeline(
@@ -32,8 +32,12 @@ generation_args = {
 	"temperature": 0.3,
 	"do_sample": False,
 }
-start_time = time.time()
-output = pipe(messages, **generation_args)
-end_time = time.time()
-print("\nTime taken: ", end_time - start_time, "seconds")
-print("\nResponse: ", output[0]['generated_text'])
+
+while True:
+	input_str = input("Enter your message: ")
+	messages[1]["content"] = input_str
+	start_time = time.time()
+	output = pipe(messages, **generation_args)
+	end_time = time.time()
+	print("\nTime taken: ", end_time - start_time, "seconds")
+	print("\nResponse: ", output[0]['generated_text'])
